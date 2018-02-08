@@ -194,15 +194,17 @@ public class App {
                       for (Dish dish2: order) {
                           System.out.println(dish2.getId()+" "+dish2.getName() + " - price "+ dish2.getPrice()+" - weight"+ dish2.getWeight());
                       }
+                      b=false;
                   }
             } catch (NoResultException ex) {
                 System.out.println("Client not found!");
             } catch (NonUniqueResultException ex) {
                 System.out.println("Non unique result!");
             }
-            System.out.println("enough? - 1");
+
+            /*System.out.println("if that's enough? - 1");
             String enough=sc.nextLine();
-            if(enough.equals("1")){b=false; }
+            if(enough.equals("1")){b=false; }*/
         }
     }
     private static void findAllDishesWithDiscount() {
