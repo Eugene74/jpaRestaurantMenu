@@ -12,7 +12,6 @@ import javax.persistence.metamodel.Metamodel;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
-
 public class App {
     private static EntityManagerFactory managerFactory = Persistence.createEntityManagerFactory("jpaRestaurant");
     private static EntityManager manager = managerFactory.createEntityManager();
@@ -23,18 +22,20 @@ public class App {
             try {
                 fillMenu();
             } catch (Exception ex) {
-                System.out.println(" rollback");
+                System.out.println(" rollback 1");
                 manager.getTransaction().rollback();
             }
             while (true) {
-                System.out.println("1: Choice of food  - the criterion is Cost \"From\" - \"To\"");
-                System.out.println("2: Choice of food  - the criterion is Cost \"From\" - \"To\" (criteria API  -searchMinMax"); // criteria - session
+                System.out.println("1: Choice of food  - the criterion is Cost \"From\" - \"To\"  (first option)");
+                System.out.println("2: Choice of food  - the criterion is Cost \"From\" - \"To\" (second option -criteria API  -searchMinMax"); // criteria - session
 
-                System.out.println("3: Choice of food  - the criterion is Dishes with discount only");
-                System.out.println("4: findAllDishesWithDiscount"); // criteria
+                System.out.println("3: Choice of food  - the criterion is Dishes with discount only (first option)");
+                System.out.println("4: Choice of food  - the criterion is Dishes with discount only (second option -findAllDishesWithDiscount)"); // with criteria API
 
                 System.out.println("5: Choice a set of dishes of no more than a certain weight");
                 System.out.println("6: searchWeight"); // позаимствовал у парня метод - интересный поиск  по весу до 1(можно поменять) кг
+
+                System.out.println("7: Add a Dish to the Menu");
 
                 System.out.print("-> ");
                 String s = sc.nextLine();
@@ -62,6 +63,10 @@ public class App {
                         searchWeight();
                         break;
 
+                    case "7":
+                        addDish(sc);
+                        break;
+
                     default:
                         return;
                 }
@@ -71,7 +76,37 @@ public class App {
             managerFactory.close();
         }
     }
+    private static void addDish(Scanner sc) {
+        System.out.println("Enter Dish name ");
+        String name= sc.nextLine();
+        System.out.println("Enter Dish price ");
+        String pr=sc.nextLine();
+        double price = Double.parseDouble(pr);
+        System.out.println("Enter Dish weight ");
+        String wgh=sc.nextLine();
+        double weight = Double.parseDouble(wgh);
+        System.out.println("Enter Dish discount ");
+        String disc=sc.nextLine();
+        int discount = Integer.parseInt(disc);
 
+        String s = "Celebration";
+        Query query=manager.createQuery("select m from MenuRestaurant m where m.name = :name", MenuRestaurant.class);
+        query.setParameter("name", s);
+        MenuRestaurant menuRestaurant=(MenuRestaurant)query.getSingleResult();
+
+        manager.getTransaction().begin();
+        try {
+            Dish dish = new Dish(name, price, weight, discount);
+            menuRestaurant.addDishes(dish);
+            manager.persist(menuRestaurant);
+            manager.getTransaction().commit();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            System.out.println(" rollback 2");
+            manager.getTransaction().rollback();
+        }
+
+    }
     private static void fillMenu() {
         MenuRestaurant menuRestaurant = new MenuRestaurant("Celebration");
         Dish dish = new Dish("Olivie", 12, 0.150, 5);
@@ -108,7 +143,6 @@ public class App {
         manager.persist(menuRestaurant);
         manager.getTransaction().commit();
     }
-
     private static void choiceDishesCostFromTo(Scanner sc) {
         System.out.println("Enter \"from\" price:");
         String low=sc.nextLine();
